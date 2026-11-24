@@ -17,3 +17,6 @@ MonoBehaviour:
   gravityScale: 3
   jumpCutMultiplier: 0.65
   fallResetY: -10
+  maxHealth: 3
+  hitFlashDuration: 0.15
+  restartDelay: 1

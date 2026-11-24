@@ -1,3 +1,4 @@
+using PainterJourney.Core;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,9 +7,12 @@ namespace PainterJourney.Player
     /// <summary>
     /// Runs left and right and jumps. Instant start and stop, full air control,
     /// a jump that can be cut short by releasing Space, and no sticking to walls.
-    /// All numbers come from PlayerConfig.
+    /// Listens to its Health: a short red flash on a hit, and at 0 HP it turns dark,
+    /// freezes in place and ignores input. All numbers come from PlayerConfig.
     /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
+    [RequireComponent(typeof(SpriteRenderer))]
+    [RequireComponent(typeof(Health))]
     public class PlayerController : MonoBehaviour
     {
         // A contact counts as ground when its normal points mostly up,
@@ -16,6 +20,10 @@ namespace PainterJourney.Player
         private const float GroundNormalMinY = 0.7f;
         private const float WallNormalMinX = 0.7f;
         private const float InputDeadZone = 0.01f;
+
+        // Placeholder colours from the health spec. Not tuning values.
+        private static readonly Color HitColor = new Color32(0xD8, 0x4A, 0x4A, 0xFF);
+        private static readonly Color DeadColor = new Color32(0x2A, 0x2A, 0x2A, 0xFF);
 
         [SerializeField] private PlayerConfig config;
         [SerializeField] private InputActionReference moveAction;
@@ -26,6 +34,12 @@ namespace PainterJourney.Player
         private readonly ContactPoint2D[] contacts = new ContactPoint2D[16];
 
         private Rigidbody2D rb;
+        private SpriteRenderer body;
+        private Health health;
+        private Color normalColor;
+        private int lastHealth;
+        private float flashTimeLeft;
+        private bool isDead;
         private Vector2 startPosition;
         private float markerLocalX;
         private int facing = 1;
@@ -39,6 +53,14 @@ namespace PainterJourney.Player
             startPosition = rb.position;
             markerLocalX = Mathf.Abs(facingMarker.localPosition.x);
             SetFacing(1);
+
+            // The player's own sprite flashes, not the facing marker's.
+            body = GetComponent<SpriteRenderer>();
+            normalColor = body.color;
+
+            health = GetComponent<Health>();
+            health.Initialize(config.maxHealth);
+            lastHealth = health.Current;
         }
 
         private void OnEnable()
@@ -47,6 +69,15 @@ namespace PainterJourney.Player
             // these actions. Enabling is safe to repeat; they are not disabled here.
             moveAction.action.Enable();
             jumpAction.action.Enable();
+
+            health.Changed += OnHealthChanged;
+            health.Died += OnDied;
+        }
+
+        private void OnDisable()
+        {
+            health.Changed -= OnHealthChanged;
+            health.Died -= OnDied;
         }
 
         private void FixedUpdate()
@@ -57,6 +88,14 @@ namespace PainterJourney.Player
 
         private void Update()
         {
+            // Dead: frozen and dark until the room reloads. All input is ignored.
+            if (isDead)
+            {
+                return;
+            }
+
+            UpdateHitFlash();
+
             if (transform.position.y < config.fallResetY)
             {
                 ResetToStart();
@@ -102,6 +141,43 @@ namespace PainterJourney.Player
             }
 
             rb.linearVelocity = velocity;
+        }
+
+        private void OnHealthChanged(int current, int max)
+        {
+            // Only a hit that leaves the player alive flashes. Heals and the killing hit don't.
+            if (current < lastHealth && current > 0)
+            {
+                // A hit during the flash restarts it, so the red lasts until after the last hit.
+                flashTimeLeft = config.hitFlashDuration;
+                body.color = HitColor;
+            }
+            lastHealth = current;
+        }
+
+        private void OnDied()
+        {
+            isDead = true;
+            flashTimeLeft = 0f;
+            body.color = DeadColor;
+
+            // Stop in place, also in mid-air: no falling, no sliding.
+            rb.linearVelocity = Vector2.zero;
+            rb.constraints = RigidbodyConstraints2D.FreezeAll;
+        }
+
+        private void UpdateHitFlash()
+        {
+            if (flashTimeLeft <= 0f)
+            {
+                return;
+            }
+
+            flashTimeLeft -= Time.deltaTime;
+            if (flashTimeLeft <= 0f)
+            {
+                body.color = normalColor;
+            }
         }
 
         private float JumpTakeOffSpeed()

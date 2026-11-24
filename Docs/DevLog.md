@@ -199,3 +199,73 @@ I read the spec and checked the numbers in the decisions table match my answer.
 I played Room01 and went through the spec's checklist: moving, jumping, walls, the fall reset and changing Move Speed in PlayerConfig. Everything worked.
 
 **Time spent:** About 15 minutes (build and play-test)
+
+## 2026-11-24 · Session 6 · Health and brush attack specs (interview)
+
+**Goal:** While the player movement build ran, write the next two specs, health-and-restart and brush-attack, in the same interview session, so each build session can start as soon as the feature before it is tested and committed.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, the session 4 interview session)
+
+**Key prompts:**
+> whle the other chat is working, wanna continue interviewing me for the rest and start a subagent for each afrer we finish the interview
+
+> lets interview for the feature 3 and the rest
+
+**What the AI produced:**
+* A change to my plan: the builds run one at a time, not all at once, because each feature builds on the one before and they all edit Room01 in the same Unity Editor.
+* 6 questions for health-and-restart and Docs/Specs/health-and-restart.md with 17 acceptance criteria.
+* 6 questions for the brush attack and Docs/Specs/brush-attack.md with 20 acceptance criteria.
+* The health build session (Session 7), started after I approved its spec.
+
+**Accepted:**
+* Health: 3 HP and 1 damage per hit, "Take 1 damage" / "Heal 1" test buttons in the Inspector instead of hazards, 3 orange pips top-left, a 0.15 s red flash, and at 0 HP a dark freeze and a room reload after 1.0 s. Falling out of the room still only resets the player, with no HP lost.
+* Brush: a 1.5 × 1.2 hit box for 0.1 s, swinging anywhere with no slowdown, a walk-through test dummy with 3 HP at x = −2, only J attacks (the mouse click and Enter come off Attack), and a blue stroke the size of the hit box.
+* Builds one at a time, each after I test and commit the one before.
+
+**Changed (and why):**
+* Health: the AI recommended 5 HP, but I picked 3 HP, so every hit matters more.
+* Brush: the AI recommended a 0.35 s cooldown, but I picked no cooldown, so every press of J swings. The AI added one rule so the spec has no gap: a press during a running 0.1 s swing is ignored.
+
+**Rejected (and why):**
+* Building all the features in parallel, because they would overwrite each other's changes in Room01.
+
+**How I verified it:**
+I read both specs and checked that the Decisions tables match my answers before approving them.
+
+**Time spent:** About 35 minutes
+
+## 2026-11-24 · Session 7 · Health and restart build
+
+**Goal:** Build the health-and-restart feature from Docs/Specs/health-and-restart.md in a fresh session: 3 HP, the pips, the red hit flash, the dark death freeze and the room reload. Every scene and asset change goes through the Unity CLI against the open Editor.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 6 spec interview)
+
+**Key prompts:**
+> Build the health-and-restart feature exactly as written in Docs/Specs/health-and-restart.md. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Every reference comes from the Inspector: no Find* and no singletons. The game code never references the UI.
+
+> Check in Play Mode (for example by calling TakeDamage and Heal through the CLI) that the pips, the flash, the death freeze and the reload work. Re-check that the 23 movement criteria still hold.
+
+**What the AI produced:**
+* Health.cs in Assets/_Game/Scripts/Core/: the only place HP changes, with TakeDamage, Heal, the Changed and Died events and the "Take 1 damage" / "Heal 1" items in the component's ⋮ menu. It has no number field. The player passes PlayerConfig.maxHealth to it in Awake. A small Inspector script (Core/Editor/HealthEditor.cs) shows the current HP read-only in Play Mode.
+* Three new PlayerConfig fields with their values on the asset: maxHealth 3, hitFlashDuration 0.15, restartDelay 1.0.
+* PlayerController listens to its Health: a 0.15 s red flash on a hit that doesn't kill, and at 0 HP it turns dark, freezes in place (also in mid-air) and ignores input.
+* HealthHud.cs (UI) and a HUD canvas in Room01 (Screen Space Overlay, scaled from 1920 × 1080): one 48 × 48 pip per max HP, 16 px apart, 54 px from the top-left corner, orange when full and dark grey when empty.
+* RoomRestart.cs (Rooms) on a RoomRestart object in Room01: it reloads the active scene restartDelay seconds after the player dies, only once.
+* A Play Mode check through the CLI with a frame-by-frame recorder: hits, heals, the flash timing, death, the reload timing, the mid-air death, maxHealth 5, restartDelay 3, and all 23 movement checks again. The Console stayed at 0 errors and 0 warnings.
+
+**Accepted:**
+* The whole feature as the spec describes it: 3 HP, the pips, the red flash, the dark freeze and the reload after 1.0 s
+* The small Inspector script that shows the current HP, so I can see the number while testing
+
+**Changed (and why):**
+* Nothing this session.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+I read the build report. The AI's own Play Mode check through the CLI passed: hits, heals, the flash timing, death, the reload, the mid-air death, changing maxHealth and restartDelay, and all 23 movement checks again, with 0 errors and 0 warnings in the Console. I didn't play-test it myself yet.
+
+**Time spent:** About 15 minutes
