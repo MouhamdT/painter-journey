@@ -186,15 +186,16 @@ I read the spec and checked the numbers in the decisions table match my answer.
 * A Play Mode check with simulated key presses: rest height, full jump, tap, A and D, the wall, the head bump, landing on the platform and the fall reset. The Console stayed at 0 errors and 0 warnings.
 
 **Accepted:**
-* 
+* The movement feels right: instant run, variable jump, no wall sticking, and all checks pass in Play Mode
+* The half-step jump fix, so the jump is really 3.5 units
 
 **Changed (and why):**
 * Jump take-off speed: the spec's formula √(2 × g × jumpHeight) only gave a 3.36-unit jump in Unity, because physics runs in 0.02 s steps. That is outside criterion 9's tolerance. The AI added a half-step correction, so the jump is now 3.50 units. jumpHeight still means "how high the feet rise".
 
 **Rejected (and why):**
-* 
+* Nothing this session.
 
 **How I verified it:**
+I played Room01 and went through the spec's checklist: moving, jumping, walls, the fall reset and changing Move Speed in PlayerConfig. Everything worked.
 
-
-**Time spent:** 
+**Time spent:** About 15 minutes (build and play-test)
