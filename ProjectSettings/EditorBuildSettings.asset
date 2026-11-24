@@ -8,6 +8,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/_Game/Scenes/Room01.unity
     guid: 63faa403159e74a24975e90082f337fa
+  - enabled: 1
+    path: Assets/_Game/Scenes/PaintingReveal.unity
+    guid: 4f2d52d50f91a41cd94b5c7bae85e670
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

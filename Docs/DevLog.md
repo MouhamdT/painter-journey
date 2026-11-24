@@ -447,3 +447,35 @@ I read each spec and checked that its Decisions table matches my answers before 
 I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop before committing. The AI also tested all 16 acceptance criteria in Play Mode: the first blob after 2 s and then one every 2 s, blobs aimed at the player and flying through the platform, swatting a blob with the brush, two hits from the platform killing the Shooter, the Shooter coming back after a restart, and changing the config values. It also re-ran the checks from the earlier specs, and the Console stayed at 0 errors and 0 warnings.
 
 **Time spent:** About 15 minutes (build and the AI's Play Mode check)
+
+## 2026-11-24 · Session 13 · Room clear and door build
+
+**Goal:** Build the room-clear-and-door feature from Docs/Specs/room-clear-door.md in a fresh session. Every scene and asset change goes through the Unity CLI against the open Editor, and the AI tests all 13 criteria itself in Play Mode.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 4 interview session)
+
+**Key prompts:**
+> Build the room-clear-and-door feature exactly as written in `Docs/Specs/room-clear-door.md`. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Test all 13 acceptance criteria yourself in Play Mode through the CLI. Re-check the earlier specs' criteria, switching enemies off where they'd interrupt an older check. Make sure the Console is clean.
+
+**What the AI produced:**
+* RoomConfig.cs, RoomClear.cs and Door.cs in Assets/_Game/Scripts/Rooms/, and RoomConfig.asset (doorOpenDelay 0.5). RoomClear listens to the Died event of every Health in its Inspector list (the Chaser and the Shooter). When all of them are dead, in any order or in the same frame, it opens the door once, doorOpenDelay seconds later.
+* The door in Room01 at x 8 to 9, y −4 to −2: a "Door" object with the yellow glow (#F2D27A), the exit trigger, RoomBounds and Door, and a "ClosedBlock" child with the dark brown-grey block (#4A4038), its solid collider and RoomBounds. Opening turns the block off and the glow and the trigger on. Touching the open doorway (the player found with TryGetComponent<PlayerController>(), ignored while its Health is dead) loads PaintingReveal. Turning the trigger on also catches a player who is already standing in the doorway.
+* The right wall shortened to y −2 to 5, a RoomClear object with the Chaser's and the Shooter's Health, the Door and the RoomConfig set in the Inspector.
+* Assets/_Game/Scenes/PaintingReveal.unity as a placeholder (only an orthographic camera with a plain #1E1E1E background), and the build list set to Room01, then PaintingReveal.
+* A Play Mode check through the CLI with frame-by-frame drivers: all 13 criteria, the spec's edge cases, and the movement, health, brush, Chaser and Shooter drivers from Sessions 10 and 12 again.
+
+**Accepted:**
+* The whole feature as the spec describes it: a solid door while any enemy lives, the glow 0.5 s after the last kill, PaintingReveal the moment the living player touches the doorway (also when already pressed against it), blobs stopped at the doorway closed or open, and a closed door with both enemies back after a reload
+
+**Changed (and why):**
+* No game code changed after the first test run. One check (the blobs at the door) had to be run again because of the test, not the game: the driver had kept a reference to the blob prefab from an earlier command, which Unity had already thrown away. The re-run took the prefab from the Shooter's own Inspector field, and every blob disappeared at the door.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop before committing. The AI also tested all 13 acceptance criteria in Play Mode: the closed door and the shorter wall, the player stopping at the door, the door staying closed with one enemy left, the glow half a second after the last kill, PaintingReveal loading on touch and when already pressed against the door, the reload closing the door again, blobs stopping at the door, the build list, the delay set to 2 on the config and the Inspector fields. It also re-ran the checks from the earlier specs, and the Console stayed at 0 errors and 0 warnings.
+
+**Time spent:** About 15 minutes (build and the AI's Play Mode check)
