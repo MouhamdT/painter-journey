@@ -20,3 +20,7 @@ MonoBehaviour:
   maxHealth: 3
   hitFlashDuration: 0.15
   restartDelay: 1
+  attackWidth: 1.5
+  attackHeight: 1.2
+  attackDuration: 0.1
+  attackDamage: 1

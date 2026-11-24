@@ -269,3 +269,38 @@ I read both specs and checked that the Decisions tables match my answers before 
 I read the build report. The AI's own Play Mode check through the CLI passed: hits, heals, the flash timing, death, the reload, the mid-air death, changing maxHealth and restartDelay, and all 23 movement checks again, with 0 errors and 0 warnings in the Console. I didn't play-test it myself yet.
 
 **Time spent:** About 15 minutes
+
+## 2026-11-24 · Session 8 · Brush attack build
+
+**Goal:** Build the brush-attack feature from Docs/Specs/brush-attack.md in a fresh session: J swings the brush, a blue stroke shows exactly the hit box, and a walk-through test dummy with 3 HP gives it something to hit. Every scene and asset change goes through the Unity CLI against the open Editor.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 6 spec interview)
+
+**Key prompts:**
+> Build the brush-attack feature exactly as written in Docs/Specs/brush-attack.md. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Remove `<Mouse>/leftButton` and `<Keyboard>/enter` from `Player/Attack` in `Assets/Settings/InputSystem_Actions.inputactions`, through Unity, then read the bindings back.
+
+> Check in Play Mode through the CLI that the 20 acceptance criteria hold, and re-check the movement and health criteria. Leave Room01 open in the Editor and saved.
+
+**What the AI produced:**
+* PlayerAttack.cs in Assets/_Game/Scripts/Player/: one swing per press of J, a press during a running swing or during the death pause is ignored, the side is locked at the press, and an OverlapBox each physics step (triggers included) hits each Health at most once per swing and never the player's own.
+* A read-only Facing property on PlayerController, and four new PlayerConfig fields under an "Attack" header with their values on the asset: attackWidth 1.5, attackHeight 1.2, attackDuration 0.1, attackDamage 1.
+* A BrushStroke child on the Player: the placeholder square in blue (#4A90D9), sorting order 20, sized and placed from PlayerConfig at each swing and shown only during it.
+* TestDummy.cs and DummyConfig.cs in a new Assets/_Game/Scripts/Enemies/ folder, DummyConfig.asset (maxHealth 3, hitFlashDuration 0.15), and a grey TestDummy in Room01 at x = −2 with a trigger collider, a 0.15 s red flash and deactivation at 0 HP.
+* The left mouse button and Enter bindings removed from Attack through the Input System API. J and the gamepad, touch, joystick and XR bindings stay.
+* A Play Mode check through the CLI: all 20 criteria plus three edge cases (a press during a swing, a target walking into the box, J held for 2 s), the movement checks and the health checks again. The Console stayed at 0 errors and 0 warnings.
+
+**Accepted:**
+* The whole feature as the spec describes it: J only, a 1.5 × 1.2 box for 0.1 s, 1 damage, no cooldown, the blue stroke and the walk-through dummy with 3 HP
+
+**Changed (and why):**
+* The AI's first run showed the blue stroke 0.12 units ahead of the drawn player while running, because the sprite is smoothed between physics steps. The AI moved the stroke into the player's local space, so it now sits on the drawn front edge. The hit box itself was already right.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop before committing. The AI also checked all 20 acceptance criteria itself in Play Mode, driving the keyboard and mouse through the Unity CLI and measuring each result: the stroke's size and position on both sides (1.50 × 1.20, touching the player's front edge), how long it stays on (0.100 s), the dummy's HP after each swing and its 0.15 s red flash, holding J, fast presses, swinging while running at 7 and at the top of a jump, the mouse and Enter doing nothing, running through the dummy, no swing during the death pause, the dummy coming back after the reload, and attackWidth 3 (set back to 1.5 afterwards). It also checked three edge cases (a press during a swing, a target walking into the box, J held for 2 s), re-ran the 23 movement checks and the health checks, and took a Game view screenshot in the middle of a swing. The Console stayed at 0 errors and 0 warnings.
+
+**Time spent:** About 15 minutes (build and the AI's Play Mode check)

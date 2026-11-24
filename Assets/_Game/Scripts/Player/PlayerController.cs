@@ -46,6 +46,9 @@ namespace PainterJourney.Player
         private bool canCutJump;
         private bool jumpedSincePhysicsStep;
 
+        /// <summary>The side the player faces: 1 = right, -1 = left.</summary>
+        public int Facing => facing;
+
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
