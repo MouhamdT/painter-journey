@@ -513,3 +513,36 @@ I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop b
 I played the reveal myself: I watched the colour brush down the first panel, tried pressing Space too early, and continued to the Ending. I also went through the diff in GitHub Desktop before committing. On top of that, the AI ran all 12 acceptance criteria in Play Mode (including a full run from Room01 through the door and a longer wipe set in the config) and re-checked the earlier features, with no errors or warnings in the Console.
 
 **Time spent:** About 15 minutes (build and the AI's Play Mode check)
+
+## 2026-11-24 · Session 15 · Main menu build
+
+**Goal:** Build the main menu from Docs/Specs/main-menu.md in a fresh session. Every scene and asset change goes through the Unity CLI against the open Editor, and the AI tests all 11 criteria itself in Play Mode.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 4 interview session)
+
+**Key prompts:**
+> Build the main menu exactly as written in `Docs/Specs/main-menu.md`. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Test all 11 acceptance criteria yourself in Play Mode through the CLI, including keyboard navigation, mouse hover and click, and Quit stopping Play Mode. Take a Game view screenshot to confirm the layout at 1920 × 1080 and at 1280 × 720. Check a full run from MainMenu through Room01, the door and the reveal to the Ending. Make sure the Console is clean.
+
+**What the AI produced:**
+* MainMenu.cs in Assets/_Game/Scripts/UI/ with StartGame (loads Room01) and QuitGame (stops Play Mode in the Editor, Application.Quit in the build), hooked to the buttons' OnClick in the Inspector. A second press before the scene changes is ignored, so Enter twice loads Room01 once.
+* MenuButton.cs in the same folder: hovering a button selects it, and the label turns dark while the button is selected and white otherwise. The Button's own colour tint gives the yellow (#F2D27A) for the selected state and grey (#6A6A6A) otherwise, so only one button is yellow at a time.
+* Assets/_Game/Scenes/MainMenu.unity: a camera with the dark #1E1E1E background; the small painting at (0, 1.2) (a dark brown frame 0.15 thick around five grey panels, with the same thin frame strip between panels as in PaintingReveal); a Screen Space Overlay canvas scaled from 1920 × 1080 with the title, the Start and Quit buttons and the controls line in TextMeshPro; a MainMenu object; and an EventSystem with the Input System UI Input Module using the project's UI action map, Start as the first selected object, and background clicks not clearing the selection. The buttons only navigate up and down, so A and D do nothing.
+* The build list set to MainMenu, Room01, PaintingReveal, Ending.
+* A Play Mode check through the CLI with frame-by-frame drivers: all 11 criteria, the spec's edge cases, screenshots at both sizes, both ways of quitting, a full run to the Ending, and the movement, health, brush, Chaser, Shooter and door drivers from the earlier sessions again.
+
+**Accepted:**
+* The whole feature as the spec describes it: the title, the grey teaser painting, Start selected and yellow on opening, W/S and the arrows moving the selection, Enter and a click on Start loading a fresh Room01, hover selecting a button, Quit stopping Play Mode, A/D/Space/J/Esc ignored, and the layout holding at 1280 × 720
+* MenuButton.cs as a small extra script, because the Button's colour tint only changes the background, and the spec wants dark text on the yellow button and hover to move the selection
+
+**Changed (and why):**
+* No game code changed after the first test run. Two of the AI's test commands had to be run again because of the shell, not the game: the helper that sets the Game view size and the loop over the two Quit tests passed their arguments as one word, so they never ran. Run one by one, both passed.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+I tried the menu myself in Play Mode and looked through the changes in GitHub Desktop before committing. The AI drove every acceptance criterion and edge case with simulated keys and mouse input, looked at screenshots at two screen sizes, played through from the menu to the Ending and re-ran the drivers for the older features. Leaving out the screenshot capture, which adds two warnings of its own on the Mac, the Console stayed empty.
+
+**Time spent:** 35 minutes.
