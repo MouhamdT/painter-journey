@@ -479,3 +479,37 @@ I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop b
 I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop before committing. The AI also tested all 13 acceptance criteria in Play Mode: the closed door and the shorter wall, the player stopping at the door, the door staying closed with one enemy left, the glow half a second after the last kill, PaintingReveal loading on touch and when already pressed against the door, the reload closing the door again, blobs stopping at the door, the build list, the delay set to 2 on the config and the Inspector fields. It also re-ran the checks from the earlier specs, and the Console stayed at 0 errors and 0 warnings.
 
 **Time spent:** About 15 minutes (build and the AI's Play Mode check)
+
+## 2026-11-24 · Session 14 · Painting reveal build
+
+**Goal:** Build the painting reveal from Docs/Specs/painting-reveal.md in a fresh session. Every scene and asset change goes through the Unity CLI against the open Editor, and the AI tests all 12 criteria itself in Play Mode.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 4 interview session)
+
+**Key prompts:**
+> Build the painting reveal exactly as written in `Docs/Specs/painting-reveal.md`. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Test all 12 acceptance criteria yourself in Play Mode through the CLI. Take a Game view screenshot mid-wipe and after it to confirm the look. Re-check that Room01's door still loads PaintingReveal, and the earlier specs' main checks. Make sure the Console is clean.
+
+**What the AI produced:**
+* PaintingConfig.cs and PaintingReveal.cs in Assets/_Game/Scripts/UI/, and PaintingConfig.asset (revealedPart 1, totalParts 5, wipeDelay 0.5, wipeDuration 1.5).
+* The painting in PaintingReveal, centred at (0, 0.5): a dark brown frame (#5A3E2B) 0.3 thick around five grey panels (#6A6A6A), and over panel 1 the placeholder landscape (sky blue #7EC8E3 on top, grass green #6DBE5A below) set to "Visible Inside Mask". A SpriteMask under a pivot at the panel's top edge grows down at an even speed, so only the mask is scaled and the art is never stretched.
+* "Part 1 of 5" (white) and "Press Space to continue" (light grey, smaller) in TextMeshPro on a uGUI canvas under the painting. The TMP Essential Resources were imported, because the project didn't have them yet.
+* The script hides the text, waits wipeDelay, runs the wipe over wipeDuration, then shows both lines in the same frame. From the next frame on, a new press of the Jump action (the same InputActionReference the player uses) loads Ending, once.
+* Assets/_Game/Scenes/Ending.unity as a placeholder (only a camera with the plain #1E1E1E background), and the build list set to Room01, PaintingReveal, Ending.
+* A Play Mode check through the CLI with frame-by-frame drivers: all 12 criteria, the spec's edge cases, two Game view screenshots, and the movement, health, brush, Chaser, Shooter and door drivers from Sessions 10, 12 and 13 again.
+
+**Accepted:**
+* The whole feature as the spec describes it: the grey framed painting with no text at the start, the colour brushed down panel 1 from 0.5 s to 2.0 s, the two lines appearing together, Space ignored during the wipe and while held from before the prompt, and the Ending loading on a new press
+* A thin strip of frame colour between neighbouring panels (each panel is drawn 1.9 wide in its 2-wide slot), because five touching panels of the same flat grey would look like one grey block
+
+**Changed (and why):**
+* The first test run showed the reveal script with no config and no input action. The setup had assigned them and then opened another scene before saving, which threw the references away. The AI assigned them again with the scene open, and the next run passed. No game code changed after that.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+I played the reveal myself: I watched the colour brush down the first panel, tried pressing Space too early, and continued to the Ending. I also went through the diff in GitHub Desktop before committing. On top of that, the AI ran all 12 acceptance criteria in Play Mode (including a full run from Room01 through the door and a longer wipe set in the config) and re-checked the earlier features, with no errors or warnings in the Console.
+
+**Time spent:** About 15 minutes (build and the AI's Play Mode check)
