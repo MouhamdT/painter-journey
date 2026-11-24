@@ -4,7 +4,7 @@
 
 **Goal:** Get a list of features for my game and sort them with MoSCoW for Backlog.md.
 
-**Model:** Claude Opus 5.5
+**Model:** Claude Opus 5.5 (claude.ai chat)
 
 **Key prompts:**
 > You're a game designer who helps students scope their first game.
@@ -44,7 +44,7 @@ I read every row and checked if this is the game I want to work on.
 
 **Goal:** Set up the Unity 6.3 project inside my HA01 repo and write CLAUDE.md, so the agent knows the rules of my project before it builds anything.
 
-**Model:** Claude Opus 5.5
+**Model:** Claude Opus 5.5 (claude.ai chat)
 
 **Key prompts:**
 > Let's start Home Assignment 02. Here are the assignment PDF and the lecture slides.
@@ -83,3 +83,46 @@ For CLAUDE.md, the AI drafted it from the context-kit template and marked every 
 I checked the file list in github desktop, in unity console, after each prompt i check claude.md and verify that it adds the settings right
 
 **Time spent:** 1 hour 25 minutes
+
+## 2026-11-24 · Session 3 · Moving to Claude Code, setup fixes and HA02 plan
+
+**Goal:** Move from the claude.ai chat to Claude Code, so the agent can read the repo and drive the Unity Editor itself. Then get a plan for the HA02 prototype before anything is built.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, Plan mode first)
+
+**Key prompts:**
+> First task: read the repo, tell me how it's structured and what's in it now, then suggest a plan for the HA02 prototype. Don't change anything until I approve.
+
+> should we do some edits on the task since all the time i ran it on regular chat instead of claude code? then we continue ?
+
+**What the AI produced:**
+* A read-only look at the repo, the HA02 PDF and the Lesson 3, 4 and 6 slides. `unity status` showed my project connected and "ready" on 6000.3.29f1.
+* Two gaps between CLAUDE.md and the project: Attack wasn't bound to J and there was no Pause action.
+* A plan in three parts: setup fixes for working in Claude Code, one spec per feature in build order (player movement, health and restart, brush attack, enemy A, enemy B, room clear and door, painting reveal, main menu, ending), then the Windows build and the GitHub Release.
+* Three questions, which I answered: both enemy types in Room01 already, the Ending shows the painting so far (1 of 5), and Pause is only a key binding with no menu.
+* The setup fixes, after I approved the plan:
+  * .claude/settings.json with the Lesson 3 permission rules: force push, reset --hard and .env are blocked, and git commit and git push always ask me.
+  * J added to Attack and a new Pause action on Esc in InputSystem_Actions. Unity reimported it and read the bindings back.
+  * Docs/Specs/SPEC-template.md copied from the context-kit.
+  * Two CLAUDE.md lines: always use 6000.3.29f1 because 6000.6.6f1 is also installed, and where the spec template is. Plus the HA02 scope and Pause decisions.
+  * The Model line of sessions 1 and 2 now says they ran in the claude.ai chat.
+* An answer to "how many features im making in the HLD?": 8 Musts in the HLD. HA02 splits its part of them into 9 smaller specs, so each one fits in one build session.
+
+**Accepted:**
+* The plan: one spec per feature, in build order, with an interview session that writes the spec and a fresh session that builds it (the Lesson 4 loop)
+* The Ending shows the painting so far (1 of 5 parts) in HA02, and the full painting only after the boss later
+* Pause as a key binding only, so CLAUDE.md is true, with no pause menu yet
+* All the setup fixes listed above
+* Adding the permission rules now, so the agent can't commit or push for me
+
+**Changed (and why):**
+* Enemies: the AI suggested only one enemy type in Room01 for HA02 and the second one in HA03. I chose both types now to see if it will be too much.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+I read every changed file in GitHub Desktop: CLAUDE.md, the Dev Log, the new settings.json and the spec template. I opened InputSystem_Actions in Unity and saw J [Keyboard] under Attack and Escape [Keyboard] under Pause. They don't do anything in Play Mode yet because there is no player script.
+
+
+**Time spent:** About 45 minutes

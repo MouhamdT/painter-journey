@@ -3,8 +3,9 @@
 ## Project
 - Unity 6.3 LTS (6000.3.29f1), Universal 2D template, input: Input System only (activeInputHandler 1, so the old Input Manager is off).
 - Solo student project. The agent writes all the code; I review it, test it in Play Mode and commit it.
-- Design: Docs/HLD.md. Backlog: Docs/Backlog.md. Feature specs: Docs/Specs/. Dev Log: Docs/DevLog.md.
-- HA02 scope (from the Backlog): main menu, one room, the painting screen and the ending. Nothing from later deadlines yet.
+- Unity 6000.6.6f1 is also installed on this Mac, for another course. Always use 6000.3.29f1 for this project.
+- Design: Docs/HLD.md. Backlog: Docs/Backlog.md. Feature specs: Docs/Specs/ (new specs start from Docs/Specs/SPEC-template.md). Dev Log: Docs/DevLog.md.
+- HA02 scope (from the Backlog): main menu, one room with both enemy types, the painting screen and the ending. Nothing from later deadlines yet.
 
 ## Architecture
 - Game code lives in Assets/_Game/Scripts/<Area>/ with the namespace PainterJourney.<Area> (Player, Enemies, Rooms, UI, Core).
@@ -12,7 +13,7 @@
 - Health.cs is the only place HP changes: TakeDamage(int) and Heal(int). The player and the enemies both use it.
 - Game code never references UI. UI listens to events such as Health.Changed.
 - One scene per screen: MainMenu, Room01, PaintingReveal, Ending, all in Assets/_Game/Scenes/ and in the build list in that order.
-- Input goes through Assets/Settings/InputSystem_Actions.inputactions, with actions for Move (A/D), Jump (Space), Attack (J) and Pause (Esc).
+- Input goes through Assets/Settings/InputSystem_Actions.inputactions, with actions for Move (A/D), Jump (Space), Attack (J) and Pause (Esc). Pause is only a binding in HA02: no pause menu yet.
 
 ## Conventions
 - Recognise the player by its component: TryGetComponent<PlayerController>(). Never by tag or name.
