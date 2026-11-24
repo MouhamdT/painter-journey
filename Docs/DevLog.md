@@ -165,3 +165,36 @@ I read every changed file in GitHub Desktop: CLAUDE.md, the Dev Log, the new set
 I read the spec and checked the numbers in the decisions table match my answer.
 
 **Time spent:** 1 hour 30 minutes
+
+## 2026-11-24 · Session 5 · Player movement build
+
+**Goal:** Build the player movement feature from Docs/Specs/player-movement.md in a fresh session, with every scene and asset change made through the Unity CLI against the open Editor.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 4 plan)
+
+**Key prompts:**
+> Build the player movement feature exactly as written in Docs/Specs/player-movement.md. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Make every scene and asset change through the Unity CLI, never by editing .unity, .prefab or .asset files as text.
+
+> Report the files changed, the scene objects and assets created, how each of the 23 acceptance criteria is met, and what I should test in Play Mode.
+
+**What the AI produced:**
+* PlayerConfig.cs (a ScriptableObject with the 5 movement numbers) and PlayerController.cs (run, jump, jump cut, ground and wall checks from contact normals, facing marker, fall reset) in Assets/_Game/Scripts/Player/.
+* PlayerConfig.asset with the spec values, a 1-unit white placeholder sprite, and a PhysicsMaterial2D with friction 0 for the player.
+* Room01.unity from the project's 2D scene template (camera and Global Light 2D), with the floor, walls, ceiling, platform and Player at the spec's positions and sizes. Room01 is the only scene in the build list, and SampleScene is still in the project.
+* A Play Mode check with simulated key presses: rest height, full jump, tap, A and D, the wall, the head bump, landing on the platform and the fall reset. The Console stayed at 0 errors and 0 warnings.
+
+**Accepted:**
+* 
+
+**Changed (and why):**
+* Jump take-off speed: the spec's formula √(2 × g × jumpHeight) only gave a 3.36-unit jump in Unity, because physics runs in 0.02 s steps. That is outside criterion 9's tolerance. The AI added a half-step correction, so the jump is now 3.50 units. jumpHeight still means "how high the feet rise".
+
+**Rejected (and why):**
+* 
+
+**How I verified it:**
+
+
+**Time spent:** 
