@@ -41,7 +41,7 @@ namespace PainterJourney.Player
             body = GetComponent<BoxCollider2D>();
             ownHealth = GetComponent<Health>();
 
-            // Every layer, and triggers too: the test dummy (and later enemies) can be triggers.
+            // Every layer, and triggers too: enemies such as the Chaser are triggers.
             targetFilter = new ContactFilter2D { useTriggers = true };
 
             stroke.enabled = false;

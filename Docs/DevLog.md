@@ -304,3 +304,113 @@ I read the build report. The AI's own Play Mode check through the CLI passed: hi
 I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop before committing. The AI also checked all 20 acceptance criteria itself in Play Mode, driving the keyboard and mouse through the Unity CLI and measuring each result: the stroke's size and position on both sides (1.50 × 1.20, touching the player's front edge), how long it stays on (0.100 s), the dummy's HP after each swing and its 0.15 s red flash, holding J, fast presses, swinging while running at 7 and at the top of a jump, the mouse and Enter doing nothing, running through the dummy, no swing during the death pause, the dummy coming back after the reload, and attackWidth 3 (set back to 1.5 afterwards). It also checked three edge cases (a press during a swing, a target walking into the box, J held for 2 s), re-ran the 23 movement checks and the health checks, and took a Game view screenshot in the middle of a swing. The Console stayed at 0 errors and 0 warnings.
 
 **Time spent:** About 15 minutes (build and the AI's Play Mode check)
+
+## 2026-11-24 · Session 9 · Enemy types and Chaser spec (interview)
+
+**Goal:** Pick the two enemy types for the game and write the spec for enemy type A, while the brush attack build ran.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, the session 4 interview session)
+
+**Key prompts:**
+> lets interview for the feature 3 and the rest
+
+> btw from now on you test them yourself, i wont test them and fill everything i will only do the commits and check that everything is right
+
+**What the AI produced:**
+* A choice of enemy pairs. I picked a Chaser (enemy A, close range) and a Shooter (enemy B, stands on the platform and fires slow paint blobs).
+* 7 questions about the Chaser and Docs/Specs/enemy-type-a.md with 18 acceptance criteria.
+* A finding while checking the numbers: a jump straight up doesn't dodge the Chaser, because it waits under the player, but a running jump does. Both are written into the criteria and examples.
+* A new way of working from now on: the build sessions test every criterion themselves and fill in the whole Dev Log entry, and I review and commit.
+
+**Accepted:**
+* Chaser: 1 × 1, 3 HP, 4 units/s (slower than my 7), notices me within 6 units and then chases for good, waits under the platform
+* A touch costs 1 HP, then the Chaser pauses for 1.0 s. I'm never invulnerable, which keeps my Session 1 decision
+* A brush hit gives a red flash and −1 HP with no knockback, and I can pass through the Chaser
+* One Chaser at x = 6, and the test dummy is removed
+
+**Changed (and why):**
+* Who tests: from this point the AI's build sessions test the features themselves and fill in the Dev Log, so I can focus on reviewing and committing.
+
+**Rejected (and why):**
+* Knockback on the Chaser, because it could be juggled and never reach me, which makes it too easy.
+* A solid Chaser, because I could get pinned against a wall.
+
+**How I verified it:**
+I read the Chaser spec and checked that the Decisions table matches my answers before approving it.
+
+**Time spent:** About 20 minutes
+
+## 2026-11-24 · Session 10 · Chaser build (enemy type A)
+
+**Goal:** Build enemy type A, the Chaser, from Docs/Specs/enemy-type-a.md in a fresh session, and remove the test dummy. Every scene and asset change goes through the Unity CLI against the open Editor, and the AI tests all 18 criteria itself in Play Mode.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 4 interview session)
+
+**Key prompts:**
+> Build enemy type A, the Chaser, exactly as written in `Docs/Specs/enemy-type-a.md`. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Remove the test dummy from Room01, and delete `TestDummy.cs`, `DummyConfig.cs` (if separate) and `DummyConfig.asset` through Unity.
+
+> Test all 18 acceptance criteria yourself in Play Mode through the CLI, measuring the results (velocities, HP, timings). Re-check the movement and health criteria and the brush criteria that don't use the dummy.
+
+**What the AI produced:**
+* Chaser.cs and ChaserConfig.cs in Assets/_Game/Scripts/Enemies/, and ChaserConfig.asset (maxHealth 3, moveSpeed 4, noticeRange 6, contactDamage 1, hitPause 1.0, hitFlashDuration 0.15). The Chaser waits until the player's x is within noticeRange, then chases for good along the floor by setting linearVelocity.x. On the last step it moves only the distance that is left, so it stops right under the player without shaking. A touch (OnTriggerStay2D) calls the player's Health.TakeDamage and starts the 1.0 s pause. A brush hit gives a 0.15 s red flash, and at 0 HP the object is deactivated.
+* A Chaser in Room01 at x = 6, y = −3.5: a 1 × 1 dark purple (#5A4A6A) square, a trigger BoxCollider2D, a Kinematic Rigidbody2D (Interpolate like the player, and Never Sleep so the touch check keeps running while both stand still), its own Health, and the Player reference set in the Inspector.
+* The TestDummy object removed from Room01, and TestDummy.cs, DummyConfig.cs and DummyConfig.asset deleted with AssetDatabase.DeleteAsset. One comment in PlayerAttack.cs that named the dummy now names the Chaser.
+* A Play Mode check through the CLI with a frame-by-frame driver: all 18 criteria, the spec's edge cases, the movement, health and brush checks again, and a Game view screenshot of the Chaser mid-chase.
+
+**Accepted:**
+* The whole feature as the spec describes it: waits until 6 units, chases for good at 4 units/s, waits still under the platform, 1 HP per touch with a 1.0 s pause, a red flash and −1 HP per brush hit with no knockback, walk-through, and gone at 0 HP
+* The test dummy removed from the room and the project
+
+**Changed (and why):**
+* The AI's first test run measured the pause as 1.02 s instead of 1.0 s, because adding up 50 physics steps of 0.0199999 s left a tiny remainder and cost one extra step. The AI added a small tolerance to the pause timer, and the next run measured exactly 1.00 s between hits.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+The AI checked all 18 criteria itself in Play Mode, driving the keyboard through the Unity CLI and measuring each result: the Chaser at (6, −3.5), 1 × 1, #5A4A6A, 3 HP and no dummy; no movement for 5 s with the player at x = −6 and for 3 s at x = −1 (6.01 units away doesn't notice, exactly 6.00 does); Linear Velocity x −4.00 once the player reaches x = 0; −4.00 all the way back to the left wall until it touched the player; standing still under the player on the platform (|dx| 0.0000, velocity 0, no HP lost); touches 3 → 2 → 1 → 0 exactly 1.00 s apart and the reload 1.00 s after death; no second hit when running through it during the pause; a brush hit giving HP 2, a 0.150 s red flash and still −4.00 with no knockback; dead after two more hits, then no damage while walking where it stood; a running jump from 2.00 units away clearing it by 0.28 units and landing on its other side with no damage (a jump straight up lost 1 HP, as the spec says); back at x = 6 with 3 HP after the reload; moveSpeed 2 chasing at −2.00 and noticeRange 10 starting at player x −3.90, each set with Play Mode stopped and set back to 4 and 6 afterwards; only the config and player fields on the Chaser component; the dummy files gone and 0 compile errors. It also checked the spec's edge cases (exactly at noticeRange, a brush hit and a kill during the pause, the fall reset, landing on it, a touch and a brush hit close together), re-ran the 23 movement checks, the health checks and the brush checks that don't use the dummy (with the Chaser switched off for the movement and brush runs, so it couldn't interrupt them), and took a Game view screenshot mid-chase. The Console stayed at 0 errors and 0 warnings. I reviewed the changes in GitHub Desktop before committing.
+
+**Time spent:** About 17 minutes (build and the AI's Play Mode check)
+
+## 2026-11-24 · Session 11 · Shooter, door, painting reveal, main menu and ending specs (interview)
+
+**Goal:** Write the remaining five HA02 specs while the Chaser build ran, so every feature has a spec ready for its build session.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, the session 4 interview session)
+
+**Key prompts:**
+> ok commited, continue how many features left for this hw ?
+
+**What the AI produced:**
+* A status table: 3 features done, 1 building and 5 left to spec and build, then the Windows build.
+* Interviews and specs, each approved by me before moving on:
+  * Docs/Specs/enemy-type-b.md (the Shooter, 16 acceptance criteria)
+  * Docs/Specs/room-clear-door.md (13)
+  * Docs/Specs/painting-reveal.md (12)
+  * Docs/Specs/main-menu.md (11)
+  * Docs/Specs/ending.md (11)
+* Two findings while checking the numbers:
+  * Blobs must fly through the platform, or almost every shot would hit the platform under the Shooter.
+  * The brush can only reach the Shooter from the platform, not from a jump beside it, which corrected something the AI had told me earlier.
+* Placeholder PaintingReveal and Ending scenes in the door and painting specs, so each build has a scene to load before the next feature fills it in.
+
+**Accepted:**
+* Shooter: on the platform at x = 3, 2 HP, harmless to touch, aimed blobs every 2 s at 5 units/s starting 2 s after the room loads, and the brush swats blobs
+* Door: a 1 × 2 door at the bottom of the right wall that glows open 0.5 s after both enemies die, and touching it loads PaintingReveal at once
+* Painting reveal: a framed painting of 5 panels, Space to continue to the Ending
+* Main menu: the title, a grey painting teaser, Start and Quit (keyboard or mouse) and a controls line
+* Ending: "The journey continues…", the painting with part 1 coloured, "1 of 5 parts painted", and Main Menu and Quit
+
+**Changed (and why):**
+* Painting reveal: the AI recommended a simple fade, but I picked a brush wipe from top to bottom, because it fits the painter theme. The spec uses a mask so the real HA04 art won't be stretched.
+
+**Rejected (and why):**
+* An automatic room end with no door, because the Backlog says the door opens when the room is clear, and walking out feels better.
+* A menu without a Quit button, because players would be stuck in the fullscreen Windows build.
+
+**How I verified it:**
+I read each spec and checked that its Decisions table matches my answers before approving it.
+
+**Time spent:** About 40 minutes

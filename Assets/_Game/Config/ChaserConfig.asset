@@ -9,8 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 12b81e486a8f54f80bb68f1170a65eb9, type: 3}
-  m_Name: DummyConfig
-  m_EditorClassIdentifier: Assembly-CSharp::PainterJourney.Enemies.DummyConfig
+  m_Script: {fileID: 11500000, guid: f1fb0b5fa50bd4ed2b178a55aab3fba4, type: 3}
+  m_Name: ChaserConfig
+  m_EditorClassIdentifier: Assembly-CSharp::PainterJourney.Enemies.ChaserConfig
   maxHealth: 3
+  moveSpeed: 4
+  noticeRange: 6
+  contactDamage: 1
+  hitPause: 1
   hitFlashDuration: 0.15
