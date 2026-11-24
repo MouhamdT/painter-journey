@@ -9,7 +9,8 @@ namespace PainterJourney.Player
     /// Swings the brush on a press of Attack (J). A swing lasts attackDuration seconds and has
     /// a box of attackWidth × attackHeight in front of the player, on the side it faced at the
     /// press. Every Health inside the box takes attackDamage, at most once per swing, and never
-    /// the player's own. The blue stroke shows exactly the box while the swing runs.
+    /// the player's own. Anything swattable inside the box (an ISwattable, such as a paint blob)
+    /// is swatted. The blue stroke shows exactly the box while the swing runs.
     /// A press during a running swing, or while the player is dead, is ignored.
     /// All numbers come from PlayerConfig.
     /// </summary>
@@ -107,6 +108,12 @@ namespace PainterJourney.Player
 
             for (int i = 0; i < overlaps.Count; i++)
             {
+                // Swattable things, such as paint blobs, disappear on touch and take no damage.
+                if (overlaps[i].TryGetComponent(out ISwattable swattable))
+                {
+                    swattable.Swat();
+                }
+
                 if (!overlaps[i].TryGetComponent(out Health target))
                 {
                     continue;

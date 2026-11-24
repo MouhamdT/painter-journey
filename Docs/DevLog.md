@@ -414,3 +414,36 @@ I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop b
 I read each spec and checked that its Decisions table matches my answers before approving it.
 
 **Time spent:** About 40 minutes
+
+## 2026-11-24 · Session 12 · Shooter build (enemy type B)
+
+**Goal:** Build enemy type B, the Shooter, from Docs/Specs/enemy-type-b.md in a fresh session. Every scene, prefab and asset change goes through the Unity CLI against the open Editor, and the AI tests all 16 criteria itself in Play Mode.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 4 interview session)
+
+**Key prompts:**
+> Build enemy type B, the Shooter, exactly as written in `Docs/Specs/enemy-type-b.md`. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Test all 16 acceptance criteria yourself in Play Mode through the CLI, measuring the results (timings, velocities, HP). Re-check the earlier specs' criteria (movement, health, brush, Chaser), switching enemies off where they would interrupt an older check.
+
+**What the AI produced:**
+* Shooter.cs, ShooterConfig.cs and PaintBlob.cs in Assets/_Game/Scripts/Enemies/, and ShooterConfig.asset (maxHealth 2, firstShotDelay 2.0, fireInterval 2.0, blobSpeed 5, blobSize 0.4, blobDamage 1, hitFlashDuration 0.15). The Shooter fires its first blob 2.0 s after the room loads, then one every 2.0 s, aimed in a straight line at the player's centre at the moment of firing (straight left if the player stands exactly inside it). The timer counts from the planned time, so the rhythm doesn't drift. A brush hit gives a 0.15 s red flash, and at 0 HP the object is deactivated, so it stops firing.
+* Assets/_Game/Prefabs/PaintBlob.prefab, made through the Editor: a 1 × 1 #E0603A square (the Shooter scales it to 0.4 × 0.4), a trigger BoxCollider2D, a Kinematic Rigidbody2D moved by linearVelocity, and PaintBlob. A blob disappears on touching a RoomBounds or the player (found with TryGetComponent<PlayerController>(), then its Health), and flies through everything else.
+* RoomBounds.cs in Rooms, an empty marker, on the Floor, WallLeft, WallRight and Ceiling (not on the Platform).
+* ISwattable.cs in Core. PaintBlob implements it, and PlayerAttack now calls Swat() on anything swattable in its box, so the Player code doesn't depend on the Enemies code. A blob holds its damage until LateUpdate, so a swing started in the same frame as the touch still swats it first (one of the spec's edge cases).
+* One Shooter in Room01 at (3, −1.0): a 1 × 1 #3F5A5A square with a trigger collider, its own Health, and the config, the Player and the blob prefab set in the Inspector.
+* A Play Mode check through the CLI with frame-by-frame drivers: all 16 criteria, the spec's edge cases, and the movement, health, brush and Chaser drivers from Session 10 again.
+
+**Accepted:**
+* The whole feature as the spec describes it: standing on the platform with 2 HP, blobs at 2, 4, 6 s aimed where the player was, at 5 units/s, 1 HP per blob, through the platform and the enemies, stopped by the floor, the walls and the ceiling, swatted by the brush, harmless to touch, gone at 0 HP, and back after the reload
+
+**Changed (and why):**
+* No code changed after the first test run. Two of the AI's checks had to be run again because of the test, not the game: the first "run away" check (C5) only ran the player to x = −2.4, which is still on the blob's line, so the blob hit it. The re-run ran to x = −0.5, and the blob missed. A later run got no keyboard input at all, because the Game view had lost focus. Restarting Play Mode right before each driver fixed that.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+I checked it myself in Play Mode, and I reviewed the changes in GitHub Desktop before committing. The AI also tested all 16 acceptance criteria in Play Mode: the first blob after 2 s and then one every 2 s, blobs aimed at the player and flying through the platform, swatting a blob with the brush, two hits from the platform killing the Shooter, the Shooter coming back after a restart, and changing the config values. It also re-ran the checks from the earlier specs, and the Console stayed at 0 errors and 0 warnings.
+
+**Time spent:** About 15 minutes (build and the AI's Play Mode check)
