@@ -123,7 +123,7 @@ How to build it:
 - Give the player's collider a PhysicsMaterial2D with Friction 0, so it never sticks to walls.
 - Set `rb.linearVelocity` directly for the horizontal speed, so the start and stop are instant. Use `linearVelocity`, not `velocity`.
 - For the ground check, count only contacts whose normal points up (the floor and the platform top), so walls and the platform's sides and underside don't count as ground. Avoid adding new layers or tags if possible.
-- Jump take-off speed = √(2 × 9.81 × gravityScale × jumpHeight). Read gravity from `Physics2D.gravity` instead of hard-coding 9.81.
+- Jump take-off speed: with g = |Physics2D.gravity.y| × gravityScale and h = ½ × g × Time.fixedDeltaTime (a half physics step), speed = h + √(h² + 2 × g × jumpHeight). The plain √(2 × g × jumpHeight) only gives about 3.36 units in Unity, because physics runs in 0.02 s steps. The half-step correction makes the feet really rise jumpHeight (3.5). Read gravity from `Physics2D.gravity` instead of hard-coding 9.81.
 - Read input only through the Input System and the `Move` and `Jump` actions of the InputSystem_Actions asset, referenced from the Inspector. No `Input.GetAxis`, no `Find*` calls and no singletons. Use only the x of `Move`.
 - Flip a child visual (the marker or a visual root), not the root's collider or Rigidbody.
 - The start position for the fall reset is wherever the player was placed in the scene when Play started, not a hard-coded number.
