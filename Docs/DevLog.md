@@ -577,3 +577,34 @@ I tried the menu myself in Play Mode and looked through the changes in GitHub De
 I opened the Ending in Play Mode myself and read through the diff before committing. The AI pressed through every criterion and edge case with simulated keyboard and mouse input, compared the layout at two screen sizes, played the game from the menu to the Ending and back twice, and repeated the older features' drivers. Not counting the two warnings the Mac screenshot capture adds, nothing appeared in the Console.
 
 **Time spent:** About 35 minutes (build and the AI's Play Mode check)
+
+## 2026-11-24 · Session 17 · Windows build
+
+**Goal:** Make a Windows 64-bit build of the HA02 prototype for the GitHub Release, through the Unity CLI against the open Editor, without changing any Player Settings.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 4 interview session)
+
+**Key prompts:**
+> Build for Windows 64-bit (StandaloneWindows64) with exactly the scenes in the build list, into `Builds/Windows/`. Name the executable after the current product name. Don't change any Player Settings.
+
+> Check the build result: success, no errors in the build report, and the output folder containing the `.exe`, the `_Data` folder and `UnityPlayer.dll`. Make sure the Editor is back on the Mac target afterwards and that the Console is clean.
+
+**What the AI produced:**
+* A Windows 64-bit Mono build in Builds/Windows/ (ignored by git): The Painter's Journey.exe, The Painter's Journey_Data with the four scenes (MainMenu, Room01, PaintingReveal, Ending), UnityPlayer.dll and Unity's support files, about 100 MB in total.
+* A read-out of the current Player Settings (company DefaultCompany, product PainterTemp, 1920 × 1080, Fullscreen Window, Mono) with a suggestion to rename the product.
+
+**Accepted:**
+* The build as it came out: it succeeded with no errors, and the only warnings came from URP's ray tracing shaders, which this 2D game doesn't use and Windows doesn't compile
+* Unity's own updates to the URP settings, the Default Volume Profile and ProjectSettings during the build (shader stripping data, missing defaults filled in), committed so they don't come back on every build
+
+**Changed (and why):**
+* After the build the Editor stayed on the Windows target, so the AI switched it back to macOS to keep Play Mode as it was. The switch reloaded the open scene and left two font warnings in the Console. They didn't come back after the scene was reopened and the scripts recompiled.
+* The product name was renamed from the setup leftover "PainterTemp" to "The Painter's Journey" before the release, and the build was made again so the exe and its data folder carry the new name.
+
+**Rejected (and why):**
+* Changing the company name (still DefaultCompany). Players don't see it in the window title or the file names, so it stays for now.
+
+**How I verified it:**
+The AI made the build itself and checked the build report and the files in the output folder; the game couldn't be started on the Mac, because the build is a Windows program. I went through the changed files in GitHub Desktop before committing.
+
+**Time spent:** About 20 minutes (two builds, checks and Dev Log)
