@@ -546,3 +546,34 @@ I played the reveal myself: I watched the colour brush down the first panel, tri
 I tried the menu myself in Play Mode and looked through the changes in GitHub Desktop before committing. The AI drove every acceptance criterion and edge case with simulated keys and mouse input, looked at screenshots at two screen sizes, played through from the menu to the Ending and re-ran the drivers for the older features. Leaving out the screenshot capture, which adds two warnings of its own on the Mac, the Console stayed empty.
 
 **Time spent:** 35 minutes.
+
+## 2026-11-24 · Session 16 · Ending build
+
+**Goal:** Build the Ending from Docs/Specs/ending.md in a fresh session. Every scene change goes through the Unity CLI against the open Editor, and the AI tests all 11 criteria itself in Play Mode.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, a side session started from the session 4 interview session)
+
+**Key prompts:**
+> Build the Ending exactly as written in `Docs/Specs/ending.md`. The spec is the source of truth. Don't add anything that isn't in it, and list ideas as suggestions at the end instead.
+
+> Test all 11 acceptance criteria yourself in Play Mode through the CLI, including a full run: MainMenu → Start → Room01 (kill both enemies) → door → reveal → Space → Ending → Main Menu → Start again. Take a Game view screenshot at 1920 × 1080 and at 1280 × 720. Re-run the earlier features' checks. Make sure the Console is clean.
+
+**What the AI produced:**
+* EndingScreen.cs in Assets/_Game/Scripts/UI/: on opening it writes "N of M parts painted" from PaintingConfig (revealedPart and totalParts). MainMenu loads the MainMenu scene and QuitGame works like the menu's Quit, both hooked to the buttons' OnClick in the Inspector, and a second press before the scene changes is ignored.
+* Assets/_Game/Scenes/Ending.unity filled in: the dark camera, the framed painting at (0, 0.8) (8 × 4.8 panel area, dark brown frame 0.25 thick, five grey panels with panel 1 showing the sky and grass), a Screen Space Overlay canvas scaled from 1920 × 1080 with "The journey continues…", the progress text and the Main Menu and Quit buttons (the main menu's colour tint and MenuButton script, up/down navigation only), an EndingScreen object, and an EventSystem with the Input System UI Input Module and Main Menu selected first.
+* A Play Mode check through the CLI with frame-by-frame drivers: all 11 criteria, the spec's edge cases, screenshots at both sizes, two full runs from the menu, and the drivers for all earlier features.
+
+**Accepted:**
+* The whole feature as the spec describes it: the coloured first panel and four grey ones, "1 of 5 parts painted", Main Menu yellow on opening, W/S and the arrows moving the selection, Enter and a click returning to the menu, Quit stopping Play Mode, A/D/Space/J/Esc ignored, a held Space or Enter from the reveal not pressing anything, the text following revealedPart, and the layout holding at 1280 × 720
+* The same thin frame strip between panels as in PaintingReveal and MainMenu (each panel drawn slightly narrower than its 1.6 slot)
+
+**Changed (and why):**
+* No game code changed after the first test run. Three earlier-feature drivers had to be run again because of the test setup, not the game: the brush and Chaser drivers lost keyboard input halfway when the Game view lost focus, and the reveal driver was started with a wrong file name. Re-run with the Game view focused, all three passed.
+
+**Rejected (and why):**
+* Nothing this session.
+
+**How I verified it:**
+I opened the Ending in Play Mode myself and read through the diff before committing. The AI pressed through every criterion and edge case with simulated keyboard and mouse input, compared the layout at two screen sizes, played the game from the menu to the Ending and back twice, and repeated the older features' drivers. Not counting the two warnings the Mac screenshot capture adds, nothing appeared in the Console.
+
+**Time spent:** About 35 minutes (build and the AI's Play Mode check)
