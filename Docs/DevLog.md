@@ -126,3 +126,42 @@ I read every changed file in GitHub Desktop: CLAUDE.md, the Dev Log, the new set
 
 
 **Time spent:** About 45 minutes
+
+## 2026-11-24 · Session 4 · Player movement spec (interview)
+
+**Goal:** Write the spec for the first HA02 feature, player movement, in an interview before anything is built, so a fresh session can build it from the spec alone.
+
+**Model:** Claude Opus 5.5 (Claude Code desktop app, started from the session 3 plan)
+
+**Key prompts:**
+> Interview me and write the spec for the first HA02 feature: player movement. Don't write any code or change any scene yet. A later fresh session builds from the spec.
+
+> Ask me one question at a time, with lettered options (a/b/c) where that helps, and your recommendation. Wait for my answer before the next question.
+
+> Every acceptance criterion must be numbered and testable in Play Mode, written as: a starting state, one action, what I see, with numbers.
+
+**What the AI produced:**
+* A read of CLAUDE.md, the HLD, the Backlog, the spec template and the input file. It found that the Move action also has W/S, arrow, gamepad and joystick bindings, and that the template camera shows about 17.8 × 10 units, so the room has to fit in that.
+* 11 interview questions, each with options and a recommendation: the room layout, player size and start, move speed, jump height, holding vs tapping Space, how short a tap is, air control, A and D together, W/S and the arrows, walls and head bumps, falling out of the room, and coyote time / jump buffer.
+* Docs/Specs/player-movement.md from the template: a decisions table with the PlayerConfig values and the Room01 layout, 23 numbered acceptance criteria with numbers and how to measure them in Play Mode, edge cases, examples, out of scope and notes for the build session.
+
+**Accepted:**
+* Room01 is a closed 16 × 8 box with one platform 4 wide, 2.5 above the floor, that fits the template camera
+* The player is 1 × 1.5, starts on the floor at x = −6 facing right, with a darker marker that shows the facing
+* 7 units/s with an instant start and stop, and the same full control in the air
+* Jump 3.5 units high with gravity scale 3, about 1 s in the air
+* A and D together cancel out, the arrows move too, W/S do nothing and the input file stays the same
+* The player stops flat at walls without sticking, and a head bump ends the jump
+* A safety net: below y = −10 the player goes back to the start
+* No coyote time or jump buffer for now, and both are in Out of scope
+
+**Changed (and why):**
+* Jump: the AI recommended a fixed jump height, but I picked a variable height where releasing Space early cuts the jump short, because I want more control in fights. A tap is about 1.5 units and a hold is 3.5 (jumpCutMultiplier 0.65).
+
+**Rejected (and why):**
+* The AI first said halving the speed on release gives a 1.5-unit tap. Then it calculated it and corrected itself: halving gives only about 0.9 units, less than the player's own height. So we used 0.65 instead of 0.5.
+
+**How I verified it:**
+I read the spec and checked the numbers in the decisions table match my answer.
+
+**Time spent:** 1 hour 30 minutes
